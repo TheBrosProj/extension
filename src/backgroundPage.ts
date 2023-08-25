@@ -1,4 +1,30 @@
-// import 'chrome-types'
+let blocklist = [];
+
+const fetchBlocklist = () => {
+  try {
+    chrome.storage.sync.get("userId", async result => {
+      if (result.userId) {
+        fetch(`https://prod.nandanvarma.com/api/blocklist/${result.userId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then((response) => {
+            if (response.ok) {
+                response.json().then((data) => console.log(data));
+            } else {
+                console.error("Failed to get shit");
+            }
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching blocklist:', error);
+  }
+};
+
+fetchBlocklist();
+
 
 chrome.runtime.onInstalled.addListener(function () {
     chrome.contextMenus.create({
@@ -8,12 +34,13 @@ chrome.runtime.onInstalled.addListener(function () {
     });
 });
 
-chrome.contextMenus.onClicked.addListener(function (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab|undefined) {
+chrome.contextMenus.onClicked.addListener(function (info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab | undefined) {
     if (info.menuItemId === "sendToNotes") {
         const text = info.selectionText;
         const url = tab?.url;
         console.log(text, url);
-        sendToNotes(text, url)
+        sendToNotes(text, url);
+        fetchBlocklist();
     }
 });
 
@@ -31,17 +58,17 @@ const sendToNotes = async (content: string | undefined, url: string | undefined)
                         details: content,
                         src: url,
                     }),
-                }).then((response)=>{
+                }).then((response) => {
                     if (response.ok) {
                         response.json().then((data) => console.log(data));
                     } else {
                         console.error("Failed to add note");
                     }
                 });
-                } 
+            }
             catch (error) {
-                    console.error("Error adding note", error);
+                console.error("Error adding note", error);
             }
         }
-      });
+    });
 }
