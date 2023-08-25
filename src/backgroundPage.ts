@@ -1,5 +1,5 @@
-let blocklist = [];
-
+// example usage
+/**
 const fetchBlocklist = () => {
   try {
     chrome.storage.sync.get("userId", async result => {
@@ -11,7 +11,11 @@ const fetchBlocklist = () => {
             },
         }).then((response) => {
             if (response.ok) {
-                response.json().then((data) => console.log(data));
+                response.json().then((data) => {
+                    chrome.storage.sync.set({ "blocklist": data }, () => {
+                        console.log("blocklist is set");
+                    });
+                });
             } else {
                 console.error("Failed to get shit");
             }
@@ -22,8 +26,7 @@ const fetchBlocklist = () => {
     console.error('Error fetching blocklist:', error);
   }
 };
-
-fetchBlocklist();
+ */
 
 
 chrome.runtime.onInstalled.addListener(function () {
@@ -40,7 +43,6 @@ chrome.contextMenus.onClicked.addListener(function (info: chrome.contextMenus.On
         const url = tab?.url;
         console.log(text, url);
         sendToNotes(text, url);
-        fetchBlocklist();
     }
 });
 

@@ -11,26 +11,27 @@ const BlocklistComponent: React.FC = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     setBlocklist(data);
+                    chrome.storage.sync.set({ "blocklist": data }, () => {
+                        console.log("blocklist is set");
+                    });
                 })
                 .catch((error) => console.error('Error fetching blocklist:', error));
         });
     };
 
     useEffect(() => {
-        // Load blocklist from storage on component mount
         chrome.storage.sync.get("blocklist", ({ blocklist: storedBlocklist }) => {
             if (storedBlocklist) {
                 setBlocklist(storedBlocklist);
             }
-
-            // Fetch the latest blocklist from the API
             fetchBlocklistFromAPI();
         });
     }, []);
 
     const addItem = () => {
-        if(!blocklist.includes(newItem)){
-            setBlocklist([...blocklist, newItem]);
+        const newUrl = new URL(newItem);
+        if (!blocklist.includes(newUrl.hostname)) {
+            setBlocklist([...blocklist, newUrl.hostname]);
             setNewItem('');
             setModified(true);
         }
@@ -49,7 +50,6 @@ const BlocklistComponent: React.FC = () => {
             setModified(false);
         });
 
-        // Also update the blocklist via API
         chrome.storage.sync.get("userId", async (result) => {
             fetch(`https://prod.nandanvarma.com/api/blocklist/${result.userId}`, {
                 method: 'PUT',
