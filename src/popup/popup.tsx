@@ -33,4 +33,4 @@ function Popup() {
         </>
     );
 };
-export { Popup };
+export default Popup;

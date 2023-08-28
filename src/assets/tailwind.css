@@ -3,5 +3,6 @@
 @tailwind utilities;
 
 body {
-    @apply bg-gray-200;
+    height: 400px;
+    width: 400px;
 }

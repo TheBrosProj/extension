@@ -1,10 +1,2 @@
-dist/js/*
-storybook-static/*
-
-/node_modules
-npm-debug.log
-yarn-error.log
-
-.DS_Store
-
-.vscode
+node_modules
+dist

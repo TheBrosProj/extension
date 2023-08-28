@@ -1,51 +1,84 @@
-const path = require("path");
+const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
+const HtmlPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const tailwindcss = require('tailwindcss')
+const autoprefixer = require('autoprefixer')
 
 module.exports = {
     entry: {
-        backgroundPage: path.join(__dirname, "src/backgroundPage.ts"),
-        popup: path.join(__dirname, "src/popup/index.tsx"),
-    },
-    output: {
-        path: path.join(__dirname, "dist/js"),
-        filename: "[name].js",
+        popup: path.resolve('src/popup/index.tsx'),
+        options: path.resolve('src/options/index.tsx'),
+        background: path.resolve('src/background/background.ts'),
+        contentScript: path.resolve('src/contentScript/contentScript.ts'),
     },
     module: {
         rules: [
             {
-                exclude: /node_modules/,
+                use: 'ts-loader',
                 test: /\.tsx?$/,
-                use: "ts-loader",
+                exclude: /node_modules/,
             },
-            // Treat src/css/app.css as a global stylesheet
             {
-                test: /\app.css$/,
+                test: /\.css$/i,
                 use: [
-                    "style-loader",
-                    "css-loader",
-                    "postcss-loader",
-                ],
-            },
-            // Load .module.css files as CSS modules
-            {
-                test: /\.module.css$/,
-                use: [
-                    "style-loader",
+                    'style-loader',
                     {
-                        loader: "css-loader",
+                        loader: 'css-loader',
                         options: {
-                            modules: true,
+                            importLoaders: 1,
                         },
                     },
-                    "postcss-loader",
+                    {
+                        loader: 'postcss-loader', // postcss loader needed for tailwindcss
+                        options: {
+                            postcssOptions: {
+                                ident: 'postcss',
+                                plugins: [tailwindcss, autoprefixer],
+                            },
+                        },
+                    },
                 ],
             },
-        ],
+            {
+                type: 'assets/resource',
+                test: /\.(png|jpg|jpeg|gif|woff|woff2|tff|eot|svg)$/,
+            },
+        ]
     },
-    // Setup @src path resolution for TypeScript files
+    "plugins": [
+        new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: false
+        }),
+        new CopyPlugin({
+            patterns: [{
+                from: path.resolve('src/static'),
+                to: path.resolve('dist')
+            }]
+        }),
+        ...getHtmlPlugins([
+            'popup',
+            'options'
+        ])
+    ],
     resolve: {
-        extensions: [".ts", ".tsx", ".js"],
-        alias: {
-            "@src": path.resolve(__dirname, "src/"),
-        },
+        extensions: ['.tsx', '.js', '.ts']
     },
-};
+    output: {
+        filename: '[name].js',
+        path: path.join(__dirname, 'dist')
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        }
+    }
+}
+
+function getHtmlPlugins(chunks) {
+    return chunks.map(chunk => new HtmlPlugin({
+        title: 'React Extension',
+        filename: `${chunk}.html`,
+        chunks: [chunk]
+    }))
+}
