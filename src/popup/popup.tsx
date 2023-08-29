@@ -1,3 +1,9 @@
+/**
+ * login and blocklist
+ * TODO: add menu options to 
+ * block list, login and upcoming features
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Login } from './login';
 import { openURL } from './lib';

@@ -1,31 +1,6 @@
-// example usage
 /**
-const fetchBlocklist = () => {
-  try {
-    chrome.storage.sync.get("userId", async result => {
-      if (result.userId) {
-        fetch(`https://prod.nandanvarma.com/api/blocklist/${result.userId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }).then((response) => {
-            if (response.ok) {
-                response.json().then((data) => {
-                    chrome.storage.sync.set({ "blocklist": data }, () => {
-                        console.log("blocklist is set");
-                    });
-                });
-            } else {
-                console.error("Failed to get shit");
-            }
-        });
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching blocklist:', error);
-  }
-};
+ * Background actions:
+ * Add context menu option to "send to notes"
  */
 
 
@@ -41,14 +16,12 @@ chrome.contextMenus.onClicked.addListener(function (info: chrome.contextMenus.On
     if (info.menuItemId === "sendToNotes") {
         const text = info.selectionText;
         const url = tab?.url;
-        console.log(text, url);
         sendToNotes(text, url);
     }
 });
 
 const sendToNotes = async (content: string | undefined, url: string | undefined) => {
     chrome.storage.sync.get("userId", result => {
-        console.log("Value currently is " + result.userId);
         if (content != undefined && url != undefined) {
             try {
                 fetch(`https://prod.nandanvarma.com/api/note/${result.userId}`, {

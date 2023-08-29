@@ -1,3 +1,7 @@
+/**
+ * add text on screen if it is in blocklist
+ */
+
 const generateSTYLES = () => {
   function getRandomCoordinate() {
     return Math.random() * 200 - 100 + '%';
@@ -16,13 +20,9 @@ const generateSTYLES = () => {
   function getRandomAngle() {
     return Math.random() * 360;
   }
-    .blur {
-      background-color: rgba(60, 60, 60, 0.4);
-      backdrop-filter: blur(10px);
-    }
     .blocker {
-      z-index: 10000;
-      position: absolute;
+      z-index: 1000;
+      position: fixed;
       top: 0;
       left: 0;
       color: white;
@@ -32,12 +32,17 @@ const generateSTYLES = () => {
       width: 100%;
       text-align: center;
       overflow: hidden;
+      background-color: rgba(60, 60, 60, 0.4);
+      backdrop-filter: blur(10px);
     }
     .blocker-text {
-      padding: 20vh 10vw 0 10vw;
+      position: relative;
+      padding: 20vh 2rem 0 2rem;
+      font-size: 2rem;
+    }
+    .animated-blocker-text{
       animation-name: appearFromRandomDirection;
       animation-duration: 2s;
-      font-size: 50px;
     }
     @keyframes appearFromRandomDirection {
       from {
@@ -56,10 +61,10 @@ const generateSTYLES = () => {
 
 const create_blocker = (pageName: string) => {
   const blocker = document.createElement("div");
-  blocker.className = "blocker blur";
+  blocker.className = "blocker";
   const blocker_text = document.createElement("p");
   blocker_text.className = "blocker-text";
-  blocker_text.innerHTML = "This page ( "+pageName+" ) is Blacklisted.";
+  blocker_text.innerHTML = `This page  ( ${pageName} )  is Blacklisted.`;
   const blocker_text2 = document.createElement("p");
   blocker_text2.className = "blocker-text";
   blocker_text2.innerHTML = "Continue working.";
@@ -71,18 +76,20 @@ const create_blocker = (pageName: string) => {
 
 
 window.onload = (event) => {
-  chrome.storage.sync.get("blocklist", (data) => {
-    console.log(data.blocklist)
+  chrome.storage.sync.get("blocklistStatus", ({ "blocklistStatus": status }) => {
+    if(status){
+      chrome.storage.sync.get("blocklist", (data) => {
     if (data.blocklist.includes(window.location.hostname)) {
       document.body.appendChild(create_blocker(window.location.hostname));
       document.head.appendChild(generateSTYLES());
       // disable scroll
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      // const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      // const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
           // if any scroll is attempted, set this to the previous value
           window.onscroll = function() {
-              window.scrollTo(scrollLeft, scrollTop);
-          };
-    }
-  })
+              window.scrollTo(0, 0);
+            };
+          }
+        });
+      }});
 };

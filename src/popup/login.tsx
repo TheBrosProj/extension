@@ -1,3 +1,7 @@
+/**
+ * Just a firebase login
+ */
+
 import React, { useState } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -27,7 +31,6 @@ function Login({handleSuccessfulLogin}:{ handleSuccessfulLogin: () => void;}) {
             auth.signInWithEmailAndPassword(email, password).then((res) => {
                 chrome.storage.sync.set({ userId: res.user?.uid }, () => {
                     handleSuccessfulLogin();
-                    console.log("Value is set");
                 });
             });
         } catch (error) {
